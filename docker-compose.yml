@@ -1,0 +1,61 @@
+version: '2'
+services:
+  # weatherservicesapi
+  weatherservicesapi:
+    image: "jigargpatel/weatherservicesapi:latest"    
+    networks:
+      - front-tier
+    expose:    
+        - 8087
+    volumes:
+      - /mnt/data/log/weatherservicesapi:/mnt/data/log/weatherservicesapi/
+    environment:
+        - USER_NAME=jigar
+        - PASSWORD=patel
+        - DARK_SKY=8bcbe49efc7756ca34c701f81cc012d6 
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+  # weatherservicesweb
+  weatherservicesweb:
+    image: "jigargpatel/weatherservicesweb:latest"    
+    networks:
+      - front-tier
+    expose:    
+        - 80
+    volumes:
+      - /mnt/data/log/weatherservicesweb:/mnt/data/log/weatherservicesweb/    
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+  # NGINX (use either HA-proxy or this)
+  lb:
+    build: .
+    image: nginx_custom_for_weather_api
+    container_name: nginx_custom_for_weather_api
+    networks:
+      - front-tier
+    ports:
+      - 80:80
+      - 443:443
+    expose:
+      - 80
+      - 443
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    links:
+      - weatherservicesapi:weatherservicesapi
+      - weatherservicesweb:weatherservicesweb
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500g"
+        max-file: "3"
+# Define networks
+networks:
+  front-tier:
+    driver: bridge
