@@ -26,7 +26,10 @@ services:
     expose:    
         - 80
     volumes:
-      - /mnt/data/log/weatherservicesweb:/mnt/data/log/weatherservicesweb/    
+      - /mnt/data/log/weatherservicesweb:/mnt/data/log/weatherservicesweb/
+    environment:
+        - API_SERVER_HOST=lb
+        - API_SERVER_PORT=443
     logging:
       driver: "json-file"
       options:
